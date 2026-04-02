@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMDB 运维中心 · 配置项概览</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    :root {
+      --primary: #1a73e8;
+      --bg: #f0f2f5;
+      --card-bg: #fff;
+      --text: #1f1f1f;
+      --text-secondary: #5f6368;
+      --border: #e8eaed;
+      --in-use: #1e8e3e;
+      --idle: #1a73e8;
+      --repair: #f9ab00;
+      --fault: #d93025;
+      --scrap: #9aa0a6;
+      --shadow: 0 1px 2px rgba(60, 64, 67, 0.15), 0 2px 6px rgba(60, 64, 67, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Top nav */
+    .top-nav {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .top-nav h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .top-nav h1 i { color: var(--primary); }
+    .tabs {
+      display: flex;
+      gap: 4px;
+    }
+    .tab-btn {
+      padding: 8px 20px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .tab-btn:hover { background: #f1f3f4; color: var(--text); }
+    .tab-btn.active {
+      background: rgba(26, 115, 232, 0.1);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Main grid: 2/3 + 1/3 */
+    .main-wrap {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 20px 24px 32px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 1200px) {
+      .main-wrap { grid-template-columns: 1fr; }
+    }
+
+    .left-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+    .right-col { display: flex; flex-direction: column; gap: 16px; min-width: 280px; }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .card-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .card-bd { padding: 16px 18px; }
+    .chart-box { width: 100%; height: 320px; }
+    .chart-box-sm { height: 260px; }
+
+    select.filter-select {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text);
+      background: #fff;
+      cursor: pointer;
+      min-width: 140px;
+    }
+
+    .btn-group { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .btn-group button {
+      padding: 6px 14px;
+      border: none;
+      background: #fff;
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      border-right: 1px solid var(--border);
+    }
+    .btn-group button:last-child { border-right: none; }
+    .btn-group button:hover { background: #f8f9fa; }
+    .btn-group button.active { background: var(--primary); color: #fff; }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .btn-link:hover { opacity: 0.85; }
+
+    /* Depreciation stats row */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 900px) {
+      .stat-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    .mini-stat {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+    }
+    .mini-stat .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+    .mini-stat .val { font-size: 18px; font-weight: 700; color: var(--text); }
+
+    /* Right sidebar */
+    .score-big {
+      font-size: 42px;
+      font-weight: 700;
+      color: var(--in-use);
+      line-height: 1.1;
+    }
+    .progress-bar {
+      height: 8px;
+      background: #e8eaed;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 12px 0 16px;
+    }
+    .progress-bar > i {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #4285f4);
+      border-radius: 4px;
+    }
+    .dim-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .dim-card {
+      background: #f8f9fa;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .dim-card:hover { border-color: var(--primary); }
+    .dim-card .d-name { font-size: 12px; color: var(--text-secondary); }
+    .dim-card .d-val { font-size: 16px; font-weight: 700; color: var(--primary); margin-top: 4px; }
+
+    .maint-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .maint-row:last-child { border-bottom: none; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: middle; }
+
+    .compliance-item {
+      border-bottom: 1px solid var(--border);
+      padding: 10px 0;
+    }
+    .compliance-item:last-child { border-bottom: none; }
+    .compliance-hd {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .compliance-hd .rate { font-weight: 600; color: var(--primary); }
+    .compliance-detail {
+      display: none;
+      margin-top: 10px;
+      padding-left: 8px;
+      border-left: 3px solid var(--primary);
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    .compliance-detail.open { display: block; }
+    .compliance-detail li { margin-bottom: 6px; }
+
+    /* Bottom actions */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 900px) {
+      .actions-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .action-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .action-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow);
+    }
+    .action-card i { font-size: 28px; color: var(--primary); margin-bottom: 10px; }
+    .action-card .t { font-size: 14px; font-weight: 600; }
+
+    .actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .btn-outline {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 10px;
+      max-width: 520px;
+      width: 100%;
+      max-height: 85vh;
+      overflow: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .modal-hd {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-hd button {
+      border: none;
+      background: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      line-height: 1;
+    }
+    .modal-bd { padding: 20px; font-size: 14px; line-height: 1.7; color: var(--text); }
+    .modal-ft {
+      padding: 12px 20px 16px;
+      border-top: 1px solid var(--border);
+      text-align: right;
+    }
+    .modal-ft .btn-primary {
+      padding: 8px 20px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .modal-ft .btn-primary:hover { filter: brightness(1.05); }
+
+    .checkbox-list label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    code.formula {
+      display: block;
+      background: #f1f3f4;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: ui-monospace, monospace;
+      margin: 12px 0;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <h1><i class="fa-solid fa-server"></i> CMDB 运维中心</h1>
+    <nav class="tabs">
+      <button type="button" class="tab-btn active" id="tab-ci">配置项概览</button>
+      <button type="button" class="tab-btn" id="tab-cloud">云资源概览</button>
+    </nav>
+  </header>
+
+  <div class="main-wrap">
+    <div class="left-col">
+      <!-- Chart A -->
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title">配置项分类统计</span>
+          <select class="filter-select" id="filterCategoryA" aria-label="配置类筛选">
+            <option value="all">全部配置类</option>
+          </select>
+        </div>
+        <div class="card-bd">
+          <div class="chart-box" id="chartStackedBar"></div>
+        </div>
+      </div>
+
+      <!-- Chart B -->
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title">配置项动态时序</span>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+            <select class="filter-select" id="filterCategoryB" aria-label="时序配置类筛选"></select>
+            <div class="btn-group" id="timeRangeGroup">
+              <button type="button" data-range="day">天</button>
+              <button type="button" data-range="week" class="active">周</button>
+              <button type="button" data-range="month">月</button>
+            </div>
+          </div>
+        </div>
+        <div class="card-bd">
+          <div class="chart-box" id="chartTrend"></div>
+        </div>
+      </div>
+
+      <!-- Chart C -->
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title">资产折旧率报表</span>
+          <button type="button" class="btn-link" id="btnDepreciationHelp">计算说明</button>
+        </div>
+        <div class="card-bd">
+          <div class="stat-row" id="depreciationStats"></div>
+          <div class="chart-box-sm" id="chartDepreciation"></div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card">
+        <div class="card-bd">
+          <div class="actions-bar">
+            <span class="card-title" style="border:none;padding:0;">高频操作</span>
+            <button type="button" class="btn-outline" id="btnCustomizeActions"><i class="fa-solid fa-sliders"></i> 自定义</button>
+          </div>
+          <div class="actions-grid" id="actionsGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="right-col">
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title">数据质量评分</span>
+        </div>
+        <div class="card-bd">
+          <div class="score-big" id="dqScore">92.5%</div>
+          <div class="progress-bar"><i style="width:92.5%"></i></div>
+          <div class="dim-cards">
+            <div class="dim-card" data-dim="完整性"><div class="d-name">完整性</div><div class="d-val">92.5%</div></div>
+            <div class="dim-card" data-dim="准确性"><div class="d-name">准确性</div><div class="d-val">88.3%</div></div>
+            <div class="dim-card" data-dim="及时性"><div class="d-name">及时性</div><div class="d-val">95.2%</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><span class="card-title">维保到期率</span></div>
+        <div class="card-bd" id="maintainBox"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><span class="card-title">合规性检查</span></div>
+        <div class="card-bd" id="complianceBox"></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal-overlay" id="modalDepreciation">
+    <div class="modal">
+      <div class="modal-hd">折旧计算说明 <button type="button" aria-label="关闭" data-close>&times;</button></div>
+      <div class="modal-bd">
+        <p>本报表采用<strong>直线法（年限平均法）</strong>计提折旧：</p>
+        <code class="formula">年折旧额 = (资产原值 − 预计净残值) ÷ 预计使用年限<br/>
+月折旧额 = 年折旧额 ÷ 12</code>
+        <p>平均折旧率 = 累计折旧 ÷ 资产原值 × 100%；残值率一般按原值的一定比例（如 5%）估算。</p>
+        <p>以上为演示说明，实际以贵司财务与 CMDB 对接规则为准。</p>
+      </div>
+      <div class="modal-ft"><button type="button" class="btn-primary" data-close>知道了</button></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalDataQuality">
+    <div class="modal">
+      <div class="modal-hd"><span id="dqModalTitle">计算标准</span> <button type="button" aria-label="关闭" data-close>&times;</button></div>
+      <div class="modal-bd" id="dqModalBody"></div>
+      <div class="modal-ft"><button type="button" class="btn-primary" data-close>关闭</button></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalCustomize">
+    <div class="modal">
+      <div class="modal-hd">自定义高频操作 <button type="button" aria-label="关闭" data-close>&times;</button></div>
+      <div class="modal-bd">
+        <p style="margin-bottom:12px;color:var(--text-secondary);font-size:13px;">勾选要在底部展示的操作卡片：</p>
+        <div class="checkbox-list" id="customizeCheckboxes"></div>
+      </div>
+      <div class="modal-ft">
+        <button type="button" class="btn-outline" style="margin-right:8px;" data-close>取消</button>
+        <button type="button" class="btn-primary" id="btnSaveCustomize">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+(function () {
+  'use strict';
+
+  var CATEGORIES = ['物理服务器', '虚拟机', '网络设备', '存储设备', '数据库', '应用系统', '安全设备', '终端设备'];
+  var STATUS_KEYS = ['使用中', '闲置', '维修中', '故障', '报废'];
+  var STATUS_COLORS = {
+    '使用中': '#1e8e3e',
+    '闲置': '#1a73e8',
+    '维修中': '#f9ab00',
+    '故障': '#d93025',
+    '报废': '#9aa0a6'
+  };
+
+  /**
+   * Mock：配置项分类统计 — all 为各配置类一行；单类 key 为单柱数据
+   */
+  var configData = {
+    all: {
+      categories: CATEGORIES,
+      series: {
+        '使用中': [420, 680, 310, 195, 240, 520, 88, 1200],
+        '闲置': [45, 62, 28, 18, 22, 48, 12, 156],
+        '维修中': [12, 18, 8, 5, 6, 15, 3, 24],
+        '故障': [3, 5, 2, 1, 2, 4, 1, 8],
+        '报废': [18, 22, 10, 8, 12, 20, 5, 42]
+      }
+    }
+  };
+
+  CATEGORIES.forEach(function (cat) {
+    var idx = CATEGORIES.indexOf(cat);
+    var base = [420, 680, 310, 195, 240, 520, 88, 1200][idx] || 200;
+    configData[cat] = {
+      categories: [cat],
+      series: {
+        '使用中': [Math.round(base * 0.78)],
+        '闲置': [Math.round(base * 0.12)],
+        '维修中': [Math.round(base * 0.05)],
+        '故障': [Math.round(base * 0.02)],
+        '报废': [Math.round(base * 0.03)]
+      }
+    };
+  });
+
+  /** Mock：时序 — day / week / month × 全部 / 各类 */
+  function buildTrendMock() {
+    var out = { all: {}, byCat: {} };
+    var gran = {
+      day: { labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'] },
+      week: { labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'] },
+      month: { labels: ['W1', 'W2', 'W3', 'W4'] }
+    };
+    ['day', 'week', 'month'].forEach(function (g) {
+      var labels = gran[g].labels;
+      var n = labels.length;
+      function series(seed) {
+        var add = [], chg = [], flt = [];
+        for (var i = 0; i < n; i++) {
+          add.push(Math.round(20 + seed * 3 + Math.sin(i + seed) * 8 + i * 2));
+          chg.push(Math.round(35 + seed * 2 + Math.cos(i * 0.7 + seed) * 12));
+          flt.push(Math.round(2 + (seed % 3) + (i % 2)));
+        }
+        return { 新增: add, 变更: chg, 故障: flt };
+      }
+      out.all[g] = series(7);
+      out.byCat = out.byCat || {};
+      CATEGORIES.forEach(function (c, si) {
+        if (!out.byCat[c]) out.byCat[c] = {};
+        out.byCat[c][g] = series(3 + si);
+      });
+    });
+    return out;
+  }
+  var trendData = buildTrendMock();
+
+  /** Mock：折旧 */
+  var depreciationMock = {
+    stats: {
+      originalValue: '¥ 128,560,000',
+      accumulated: '¥ 42,180,000',
+      avgRate: '32.8%',
+      residualRate: '5.0%'
+    },
+    buckets: [
+      { name: '1年内', value: 3200 },
+      { name: '1-2年', value: 4100 },
+      { name: '2-3年', value: 2800 },
+      { name: '3-5年', value: 1900 },
+      { name: '5年以上', value: 850 }
+    ]
+  };
+
+  var maintainMock = [
+    { key: '已过保', count: 186, pct: 4.2, color: '#d93025' },
+    { key: '即将过保', count: 512, pct: 11.5, color: '#f9ab00' },
+    { key: '正常', count: 3745, pct: 84.3, color: '#1e8e3e' }
+  ];
+
+  var complianceMock = [
+    { name: '必填属性完整率', rate: '98.2%' },
+    { name: '关系拓扑一致率', rate: '94.6%' },
+    { name: '待处理问题', rate: '6 项', expandable: true, issues: [
+      '服务器 A-01 缺少维保到期日',
+      '数据库 ORA-PRD 责任人未绑定',
+      '网络设备 SW-CORE 未关联机柜',
+      '应用系统订单服务 CI 编码重复',
+      '安全设备 FW-DMZ 审计日志未接入'
+    ]}
+  ];
+
+  var dqStandards = {
+    '完整性': '必填字段覆盖率、关联关系完备度、附件/文档齐备度加权计算。',
+    '准确性': '与源系统对账一致率、抽样校验通过率、自动发现差异闭环率。',
+    '及时性': '变更入库时效、发现数据同步延迟、审批完成 SLA 达成率。'
+  };
+
+  var actionDefs = [
+    { id: 'add', icon: 'fa-plus-circle', title: '新增配置项', show: true },
+    { id: 'fault', icon: 'fa-triangle-exclamation', title: '故障登记', show: true },
+    { id: 'audit', icon: 'fa-clipboard-check', title: '配置审计', show: true },
+    { id: 'export', icon: 'fa-file-export', title: '批量导出', show: true },
+    { id: 'rel', icon: 'fa-diagram-project', title: '关系图谱', show: false },
+    { id: 'disc', icon: 'fa-magnifying-glass-chart', title: '资产发现', show: false }
+  ];
+
+  var chartBar, chartTrend, chartDep;
+  var currentTrendClass = 'all';
+  var currentTrendRange = 'week';
+
+  function fillSelect(sel, includeAll) {
+    sel.innerHTML = '';
+    if (includeAll) {
+      var o = document.createElement('option');
+      o.value = 'all';
+      o.textContent = '全部配置类';
+      sel.appendChild(o);
+    }
+    CATEGORIES.forEach(function (c) {
+      var op = document.createElement('option');
+      op.value = c;
+      op.textContent = c;
+      sel.appendChild(op);
+    });
+  }
+
+  function getStackedOption(dataKey) {
+    var pack = dataKey === 'all' ? configData.all : configData[dataKey];
+    var cats = pack.categories;
+    var series = STATUS_KEYS.map(function (name) {
+      return {
+        name: name,
+        type: 'bar',
+        stack: 'total',
+        emphasis: { focus: 'series' },
+        itemStyle: { color: STATUS_COLORS[name] },
+        data: pack.series[name]
+      };
+    });
+    return {
+      color: STATUS_KEYS.map(function (k) { return STATUS_COLORS[k]; }),
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: function (params) {
+          if (!params || !params.length) return '';
+          var lines = params.map(function (p) {
+            return p.marker + ' ' + p.seriesName + '：<b>' + p.value + '</b>';
+          });
+          return params[0].axisValue + '<br/>' + lines.join('<br/>');
+        }
+      },
+      legend: { data: STATUS_KEYS, top: 0 },
+      grid: { left: '3%', right: '4%', bottom: '3%', top: 48, containLabel: true },
+      xAxis: { type: 'category', data: cats, axisLabel: { rotate: cats.length > 4 ? 28 : 0 } },
+      yAxis: { type: 'value', name: '数量' },
+      series: series
+    };
+  }
+
+  function getTrendOption() {
+    var labels, seriesMap;
+    if (currentTrendClass === 'all') {
+      seriesMap = trendData.all[currentTrendRange];
+    } else {
+      seriesMap = trendData.byCat[currentTrendClass][currentTrendRange];
+    }
+    if (currentTrendRange === 'day') {
+      labels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'];
+    } else if (currentTrendRange === 'week') {
+      labels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    } else {
+      labels = ['W1', 'W2', 'W3', 'W4'];
+    }
+    var colors = { '新增': '#1a73e8', '变更': '#f9ab00', '故障': '#d93025' };
+    return {
+      tooltip: { trigger: 'axis' },
+      legend: { data: ['新增', '变更', '故障'], top: 0 },
+      grid: { left: '3%', right: '4%', bottom: '3%', top: 44, containLabel: true },
+      xAxis: { type: 'category', boundaryGap: false, data: labels },
+      yAxis: { type: 'value', name: '件数' },
+      series: ['新增', '变更', '故障'].map(function (name) {
+        return {
+          name: name,
+          type: 'line',
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 6,
+          areaStyle: { opacity: 0.12 },
+          lineStyle: { width: 2 },
+          itemStyle: { color: colors[name] },
+          data: seriesMap[name]
+        };
+      })
+    };
+  }
+
+  function getDepreciationOption() {
+    return {
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      grid: { left: '3%', right: '4%', bottom: '3%', top: 24, containLabel: true },
+      xAxis: { type: 'category', data: depreciationMock.buckets.map(function (b) { return b.name; }) },
+      yAxis: { type: 'value', name: '资产数量' },
+      series: [{
+        type: 'bar',
+        data: depreciationMock.buckets.map(function (b) { return b.value; }),
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: '#4285f4' },
+            { offset: 1, color: '#1a73e8' }
+          ])
+        },
+        barMaxWidth: 48
+      }]
+    };
+  }
+
+  function renderDepreciationStats() {
+    var el = document.getElementById('depreciationStats');
+    var s = depreciationMock.stats;
+    var items = [
+      { label: '资产原值', val: s.originalValue },
+      { label: '累计折旧', val: s.accumulated },
+      { label: '平均折旧率', val: s.avgRate },
+      { label: '残值率', val: s.residualRate }
+    ];
+    el.innerHTML = items.map(function (it) {
+      return '<div class="mini-stat"><div class="label">' + it.label + '</div><div class="val">' + it.val + '</div></div>';
+    }).join('');
+  }
+
+  function renderMaintain() {
+    var el = document.getElementById('maintainBox');
+    el.innerHTML = maintainMock.map(function (m) {
+      return '<div class="maint-row"><span><span class="dot" style="background:' + m.color + '"></span>' + m.key + '</span><span><strong>' + m.count + '</strong>（' + m.pct + '%）</span></div>';
+    }).join('');
+  }
+
+  function renderCompliance() {
+    var el = document.getElementById('complianceBox');
+    el.innerHTML = complianceMock.map(function (row, i) {
+      var id = 'comp-' + i;
+      var extra = '';
+      var expandAttr = '';
+      if (row.expandable && row.issues) {
+        extra = '<div class="compliance-detail" id="' + id + '-detail"><ul style="list-style:disc;padding-left:18px;">' +
+          row.issues.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul></div>';
+        expandAttr = ' data-expand="' + id + '"';
+      }
+      return '<div class="compliance-item">' +
+        '<div class="compliance-hd"' + expandAttr + '>' +
+        '<span>' + row.name + '</span><span class="rate">' + row.rate + (row.expandable ? ' <i class="fa-solid fa-chevron-down" style="font-size:10px;margin-left:4px;"></i>' : '') + '</span></div>' +
+        extra + '</div>';
+    }).join('');
+
+    el.querySelectorAll('.compliance-hd[data-expand]').forEach(function (hd) {
+      var expandId = hd.getAttribute('data-expand');
+      hd.addEventListener('click', function () {
+        var d = document.getElementById(expandId + '-detail');
+        if (!d) return;
+        d.classList.toggle('open');
+        var icon = hd.querySelector('.fa-chevron-down');
+        if (icon) icon.style.transform = d.classList.contains('open') ? 'rotate(180deg)' : '';
+      });
+    });
+  }
+
+  function renderActions() {
+    var grid = document.getElementById('actionsGrid');
+    grid.innerHTML = '';
+    actionDefs.filter(function (a) { return a.show; }).forEach(function (a) {
+      var div = document.createElement('div');
+      div.className = 'action-card';
+      div.innerHTML = '<i class="fa-solid ' + a.icon + '"></i><div class="t">' + a.title + '</div>';
+      div.addEventListener('click', function () { alert('演示：' + a.title); });
+      grid.appendChild(div);
+    });
+  }
+
+  function renderCustomizeModal() {
+    var box = document.getElementById('customizeCheckboxes');
+    box.innerHTML = actionDefs.map(function (a) {
+      return '<label><input type="checkbox" data-id="' + a.id + '" ' + (a.show ? 'checked' : '') + '/> ' + a.title + '</label>';
+    }).join('');
+  }
+
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+  }
+  function closeModals() {
+    document.querySelectorAll('.modal-overlay').forEach(function (m) { m.classList.remove('open'); });
+  }
+
+  document.querySelectorAll('.modal-overlay [data-close]').forEach(function (btn) {
+    btn.addEventListener('click', closeModals);
+  });
+  document.querySelectorAll('.modal-overlay').forEach(function (ov) {
+    ov.addEventListener('click', function (e) {
+      if (e.target === ov) closeModals();
+    });
+  });
+
+  document.getElementById('btnDepreciationHelp').addEventListener('click', function () {
+    openModal('modalDepreciation');
+  });
+
+  document.querySelectorAll('.dim-card').forEach(function (card) {
+    card.addEventListener('click', function () {
+      var dim = card.getAttribute('data-dim');
+      document.getElementById('dqModalTitle').textContent = dim + ' · 计算标准';
+      document.getElementById('dqModalBody').innerHTML = '<p>' + (dqStandards[dim] || '暂无说明') + '</p>';
+      openModal('modalDataQuality');
+    });
+  });
+
+  document.getElementById('btnCustomizeActions').addEventListener('click', function () {
+    renderCustomizeModal();
+    openModal('modalCustomize');
+  });
+
+  document.getElementById('btnSaveCustomize').addEventListener('click', function () {
+    document.querySelectorAll('#customizeCheckboxes input[type=checkbox]').forEach(function (cb) {
+      var id = cb.getAttribute('data-id');
+      for (var j = 0; j < actionDefs.length; j++) {
+        if (actionDefs[j].id === id) {
+          actionDefs[j].show = cb.checked;
+          break;
+        }
+      }
+    });
+    renderActions();
+    closeModals();
+  });
+
+  document.getElementById('tab-ci').addEventListener('click', function () {
+    document.getElementById('tab-ci').classList.add('active');
+    document.getElementById('tab-cloud').classList.remove('active');
+  });
+  document.getElementById('tab-cloud').addEventListener('click', function () {
+    document.getElementById('tab-cloud').classList.add('active');
+    document.getElementById('tab-ci').classList.remove('active');
+    /* 云资源概览：仅占位 Tab，内容后续接入 */
+  });
+
+  var selA = document.getElementById('filterCategoryA');
+  fillSelect(selA, true);
+  selA.addEventListener('change', function () {
+    chartBar.setOption(getStackedOption(selA.value), true);
+  });
+
+  var selB = document.getElementById('filterCategoryB');
+  fillSelect(selB, true);
+  selB.addEventListener('change', function () {
+    currentTrendClass = selB.value;
+    chartTrend.setOption(getTrendOption(), true);
+  });
+
+  document.querySelectorAll('#timeRangeGroup button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('#timeRangeGroup button').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentTrendRange = btn.getAttribute('data-range');
+      chartTrend.setOption(getTrendOption(), true);
+    });
+  });
+
+  function initCharts() {
+    chartBar = echarts.init(document.getElementById('chartStackedBar'));
+    chartBar.setOption(getStackedOption('all'));
+
+    chartTrend = echarts.init(document.getElementById('chartTrend'));
+    chartTrend.setOption(getTrendOption());
+
+    chartDep = echarts.init(document.getElementById('chartDepreciation'));
+    chartDep.setOption(getDepreciationOption());
+  }
+
+  renderDepreciationStats();
+  renderMaintain();
+  renderCompliance();
+  renderActions();
+  initCharts();
+
+  window.addEventListener('resize', function () {
+    chartBar && chartBar.resize();
+    chartTrend && chartTrend.resize();
+    chartDep && chartDep.resize();
+  });
+})();
+  </script>
+</body>
+</html>

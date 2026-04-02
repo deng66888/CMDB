@@ -1,0 +1,52 @@
+.drawerTitle {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.backIcon {
+  margin-right: 8px;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.backIcon:hover {
+  color: #1890ff;
+}
+
+.body {
+  flex: 1;
+  overflow: auto;
+  padding-right: 8px;
+  margin-bottom: 16px;
+}
+
+.section {
+  margin-bottom: 16px;
+}
+
+.collapse {
+  margin-bottom: 0;
+}
+
+.collapse :global(.ant-collapse-header) {
+  font-weight: 500;
+}
+
+.footer {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 0 0;
+  border-top: 1px solid #f0f0f0;
+  background: #fff;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.footer button {
+  min-width: 88px;
+}

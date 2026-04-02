@@ -1,0 +1,29 @@
+.wrap {
+  padding: 24px;
+  background: #fff;
+  margin: 0 24px 24px;
+  border-radius: 8px;
+  min-height: 400px;
+}
+
+.help {
+  margin-bottom: 16px;
+  color: #1890ff;
+}
+.help a {
+  margin-left: 6px;
+  color: #1890ff;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.tableWrap {
+  margin-top: 16px;
+}

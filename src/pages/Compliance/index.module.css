@@ -1,0 +1,69 @@
+.wrap {
+  padding: 24px;
+  background: #fff;
+  margin: 0 24px 24px;
+  border-radius: 8px;
+  min-height: 400px;
+}
+
+.help {
+  margin-bottom: 16px;
+  color: #1890ff;
+}
+.help a {
+  margin-left: 6px;
+  color: #1890ff;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.tableWrap {
+  margin-top: 16px;
+}
+
+.nameLink {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+/* 规则状态：与文档一致，灰色=暂停、蓝色=启动 */
+.statusCell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 0;
+}
+
+/* 选中=启动：蓝色，与文档一致 */
+.statusSwitch:global(.ant-switch-checked) {
+  background: #1677ff;
+}
+
+/* 检测统计：共 X 项、Y 项不通过 并排一行 */
+.statsCell {
+  white-space: nowrap;
+}
+.statsSep {
+  margin-right: 2px;
+}
+
+/* 操作列：图标按钮间距与点击区域，符合 Ant Design 规范 */
+.actionCell {
+  display: inline-flex;
+  align-items: center;
+}
+
+.actionCell :global(.ant-btn) {
+  min-width: 32px;
+}

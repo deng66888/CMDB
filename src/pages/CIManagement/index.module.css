@@ -1,0 +1,602 @@
+.wrap {
+  padding: 24px;
+  background: #fff;
+  margin: 0 24px 24px;
+  border-radius: 8px;
+  min-height: 400px;
+}
+
+.helpBar {
+  margin-bottom: 12px;
+}
+
+.helpLink {
+  color: #1890ff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.helpLink:hover {
+  text-decoration: underline;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.configClassTrigger {
+  position: relative;
+  display: inline-block;
+}
+
+.floatPanel {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  margin-top: 4px;
+  width: 280px;
+  max-height: 70vh;
+  overflow: auto;
+  padding: 12px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  border: 1px solid #f0f0f0;
+  z-index: 100;
+}
+
+.panelContent {
+  min-width: 0;
+}
+
+.panelSearch {
+  margin-bottom: 12px;
+}
+
+.panelSearchIcon {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.panelTabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.panelTab,
+.panelTabActive {
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.65);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.panelTab:hover {
+  color: #1890ff;
+}
+
+.panelTabActive {
+  color: #1890ff;
+  font-weight: 500;
+  border-bottom-color: #1890ff;
+}
+
+.panelSection {
+  margin-top: 12px;
+}
+
+.panelSectionHead,
+.panelSectionHeadStatic {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.panelSectionHeadStatic {
+  cursor: default;
+}
+
+.panelClassNested {
+  margin-left: 8px;
+  margin-top: 4px;
+  border-left: 1px solid #f0f0f0;
+  padding-left: 8px;
+}
+
+.panelClassNested .panelSectionHead {
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.panelClassList {
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.panelTreeNodeList {
+  max-height: 360px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.panelTreeNode {
+  margin-bottom: 0;
+}
+
+.panelTreeExpand,
+.panelTreeExpandPlaceholder {
+  width: 18px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panelTreeExpand {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #666;
+}
+
+.panelTreeExpand:hover {
+  color: #1890ff;
+}
+
+.panelTreeExpandPlaceholder {
+  visibility: hidden;
+}
+
+.panelTreeNodeTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panelClassItem,
+.panelClassItemActive {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 4px;
+  border-radius: 4px;
+  margin-bottom: 2px;
+}
+
+.panelClassItem:hover {
+  background: #f5f5f5;
+}
+
+.panelClassItemActive {
+  background: #e6f4ff;
+  color: #1890ff;
+}
+
+.panelAppList {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.panelAppItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  font-size: 13px;
+  border-radius: 4px;
+}
+
+.panelAppItem:hover {
+  background: #f5f5f5;
+}
+
+.panelAppName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panelAppActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  flex-shrink: 0;
+  flex-shrink: 0;
+}
+
+.panelStarBtn,
+.panelMoreBtn {
+  padding: 2px 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.45);
+  line-height: 1;
+}
+
+.panelStarBtn:hover,
+.panelMoreBtn:hover {
+  color: #1890ff;
+}
+
+.starFilled {
+  color: #1890ff;
+}
+
+.panelEmpty {
+  padding: 16px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+}
+
+.main {
+  display: flex;
+  gap: 24px;
+  margin-top: 0;
+}
+
+.classItem {
+  padding: 8px 12px;
+  background: #e6f4ff;
+  color: #1890ff;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.sideFilter {
+  width: 280px;
+  flex-shrink: 0;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  max-height: calc(100vh - 220px);
+  overflow: auto;
+}
+
+/* 筛选触发按钮 */
+.filterTriggerBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 过滤与排序区域（展开时显示） */
+.filterBar {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  animation: filterBarExpand 0.2s ease-out;
+}
+
+@keyframes filterBarExpand {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filterBarHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.filterBarTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filterTags {
+  margin-bottom: 12px;
+}
+
+.filterTag {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  padding: 0 4px;
+}
+
+.filterSectionTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 8px;
+}
+
+.filterRows,
+.sortRows {
+  margin-bottom: 12px;
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.filterCheck {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.filterActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.sideFilter .filterSection:first-child,
+.panelContent .filterSection:first-child {
+  margin-top: 0;
+}
+
+.filterSection {
+  margin-top: 16px;
+}
+
+.filterLabel {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.categoryList > div {
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.categoryList > div:hover,
+.categoryActive {
+  background: #e6f4ff;
+  color: #1890ff;
+}
+
+.tableArea {
+  flex: 1;
+  min-width: 0;
+}
+
+.drawerMask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 1000;
+}
+
+.drawer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 400px;
+  background: #fff;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+}
+
+.drawerHead {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.drawerBody {
+  padding: 16px;
+  font-size: 13px;
+  color: #666;
+}
+
+/* 视图管理右侧面板 */
+.viewPanelMask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 999;
+}
+
+.viewPanel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 320px;
+  background: #fff;
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.viewPanelHead {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.viewPanelTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.viewPanelClose {
+  border: none;
+  background: none;
+  font-size: 20px;
+  color: rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.viewPanelClose:hover {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.viewPanelBody {
+  flex: 1;
+  overflow: auto;
+  padding: 12px;
+}
+
+.viewPanelSearchRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.viewPanelSearch {
+  flex: 1;
+}
+
+.viewPanelList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.viewPanelItem,
+.viewPanelItemActive {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.viewPanelItem:hover {
+  background: #f5f5f5;
+}
+
+.viewPanelItemActive {
+  background: #e6f4ff;
+  color: #1890ff;
+}
+
+.viewPanelItemName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.viewPanelItemActions {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.viewPanelItem:hover .viewPanelItemActions,
+.viewPanelItemActive .viewPanelItemActions {
+  opacity: 1;
+}
+
+.viewPanelFooter {
+  padding: 12px 0;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.viewPanelOnlyMine {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+/* 创建/编辑视图弹窗 */
+.viewModalSection {
+  margin-bottom: 20px;
+}
+
+.viewModalSectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 12px;
+}
+
+.viewModalSectionSub {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+  margin-bottom: 8px;
+}
+
+.viewModalHint {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-top: 8px;
+}
+
+/* 表格个性化：斑马线、高亮行 */
+.tableZebra :global(.ant-table-tbody tr:nth-child(even)) {
+  background: #fafafa;
+}
+
+.tableBorder :global(.ant-table),
+.tableBorder :global(.ant-table-tbody > tr > td) {
+  border: 1px solid #f0f0f0;
+}
+
+.tableHighlightRow :global(.ant-table-tbody tr:hover) {
+  background: #e6f7ff !important;
+}

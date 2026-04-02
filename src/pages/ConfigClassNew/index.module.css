@@ -1,0 +1,582 @@
+.wrap {
+  padding: 24px;
+  background: #fff;
+  margin: 0 24px 24px;
+  border-radius: 8px;
+  min-height: 400px;
+}
+
+.title {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+.steps {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.step,
+.stepActive {
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.step {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.stepActive {
+  background: #e6f4ff;
+  color: #1890ff;
+}
+
+.stepError {
+  background: #fff2f0;
+  color: #ff4d4f;
+  border: 1px solid #ffccc7;
+}
+
+.card {
+  margin-bottom: 24px;
+}
+
+/* CMDB 配置类图标选择器（蓝色） */
+.iconSelectGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.iconSelectItem,
+.iconSelectItemActive {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.iconSelectItem:hover {
+  border-color: #1890ff;
+  background: #e6f4ff;
+}
+
+.iconSelectItemActive {
+  border-color: #1890ff;
+  background: #e6f4ff;
+}
+
+.placeholder {
+  min-height: 200px;
+  color: #666;
+}
+
+.addRule {
+  width: 180px;
+  min-height: 72px;
+  padding: 12px 16px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 8px;
+  color: #1890ff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+.footer {
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.mainLayout {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.mainLayout .card {
+  flex: 1;
+  min-width: 0;
+}
+.rightPanel {
+  width: 260px;
+  flex-shrink: 0;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  height: fit-content;
+}
+.sidebarTabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+.sidebarTabActive {
+  color: #1890ff;
+  font-weight: 500;
+}
+.fieldTypeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.fieldTypeItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.fieldTypeItem:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+.fieldTypeIcon {
+  font-size: 14px;
+}
+.fieldTypeLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.formPropsSection {
+  margin-top: 16px;
+  font-size: 13px;
+}
+.attrFormTabs {
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.attrFilterLabel {
+  font-size: 13px;
+  color: #666;
+  margin-right: 8px;
+}
+.sectionHead {
+  font-weight: 500;
+  margin-bottom: 8px;
+  margin-top: 12px;
+}
+.sectionHead:first-child {
+  margin-top: 0;
+}
+.attrStep .sectionHead {
+  margin-top: 16px;
+}
+.collapsePlaceholder {
+  padding: 8px 0;
+  color: #999;
+  font-size: 13px;
+}
+.relatedConfig {
+  margin-bottom: 8px;
+}
+.ruleCards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.ruleCardMain {
+  width: 180px;
+  min-height: 72px;
+  background: #e6f4ff;
+  border-color: #91caff;
+  box-sizing: border-box;
+}
+.ruleCardOther {
+  width: 180px;
+  min-height: 72px;
+  background: #fffbe6;
+  border-color: #ffe58f;
+  box-sizing: border-box;
+}
+.ruleCardMixed {
+  width: 180px;
+  min-height: 72px;
+  background: #fff0f6;
+  border-color: #ffadd2;
+  box-sizing: border-box;
+}
+.ruleCard {
+  width: 180px;
+}
+/* 依赖关系图：按关系类型分组、标题 + 多配置类卡片、箭头连线；放大/缩小/适合界面 */
+.depGraphWrap {
+  position: relative;
+  width: 100%;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+}
+/* 配置类管理·查看依赖关系：随右侧区域铺满，便于缩放计算用到真实宽高 */
+.depGraphWrapFill {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow: auto;
+}
+.depGraphTopLeft {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 3;
+}
+.depGraphToolbar {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 3;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.depGraphScaled {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 420px;
+}
+.depGraphScaledFill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: min(400px, 45vh);
+  width: 100%;
+}
+.depGraphInner {
+  position: relative;
+  flex-shrink: 0;
+  overflow: visible;
+}
+/* 一组一框：关系类型淡底标题 + 贴着下面的多配置类 */
+.depGroupBox {
+  position: absolute;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  background: #fff;
+  box-sizing: border-box;
+  overflow: hidden;
+  z-index: 1;
+}
+.depGroupTitleBar {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #595959;
+  background: #f0f5ff;
+  border-bottom: 1px solid #e8eeff;
+}
+.depGroupContent {
+  padding: 10px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.depGroupItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #262626;
+  line-height: 22px;
+  min-height: 36px;
+}
+.depGroupItemIcon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: rgba(24, 144, 255, 0.1);
+}
+.depGroupItemIconSvg {
+  font-size: 20px;
+  color: #1890ff;
+}
+.depGroupItemText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+  color: #262626;
+}
+.depGroupItemDel {
+  flex-shrink: 0;
+  color: #bfbfbf;
+  cursor: pointer;
+  padding: 2px 4px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  border: none;
+  background: none;
+  pointer-events: auto;
+}
+.depGroupItemDel:hover {
+  color: #ff4d4f;
+}
+.depGroupBox,
+.depGroupContent,
+.depGroupItem {
+  pointer-events: auto;
+}
+.depGraphSvg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  display: block;
+  overflow: visible;
+}
+.depGraphNodes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+.depGraphNodes > * {
+  pointer-events: auto;
+}
+.depNode {
+  position: absolute;
+  width: 160px;
+  min-height: 52px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  background: #fafafa;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  box-sizing: border-box;
+}
+.depNode:hover {
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+  z-index: 2;
+}
+.depNodeCenter {
+  border-color: #1890ff;
+  background: linear-gradient(180deg, #f0f7ff 0%, #e6f4ff 100%);
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.12);
+}
+.depNodeIconWrap {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: rgba(24, 144, 255, 0.1);
+}
+.depNodeIcon {
+  font-size: 20px;
+  color: #1890ff;
+}
+.depNodeText {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f2937;
+  line-height: 1.35;
+  word-break: break-all;
+}
+
+.depGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.depTitle {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.depRelationItem {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.dependencyDiagram {
+  min-height: 280px;
+  position: relative;
+  padding: 24px;
+}
+.depCenter {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 12px 24px;
+  background: #e6f4ff;
+  border: 1px solid #91caff;
+  border-radius: 8px;
+  font-weight: 500;
+}
+.depGroups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
+.depGroup {
+  padding: 8px 12px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  min-width: 100px;
+}
+.depGroupTitle {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 6px;
+}
+.depGroupItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.depItem {
+  font-size: 12px;
+  padding: 2px 6px;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+}
+
+/* 表单画布拖放区域拖入时高亮（由 JS 添加 .drop-zone-active） */
+:global(.drop-zone-active) {
+  border-color: #1890ff !important;
+  background: #e6f7ff !important;
+}
+
+/* 右侧面板仅表单 Tab 显示时的布局 */
+.mainLayoutWithSidebar .card {
+  flex: 1;
+  min-width: 0;
+}
+.formSidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
+}
+.formSidebarTabs {
+  display: flex;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fff;
+}
+.formSidebarTab {
+  flex: 1;
+  padding: 10px 12px;
+  text-align: center;
+  font-size: 13px;
+  cursor: pointer;
+  color: #666;
+}
+.formSidebarTabActive {
+  color: #1890ff;
+  font-weight: 500;
+  border-bottom: 2px solid #1890ff;
+  margin-bottom: -1px;
+}
+.formSidebarBody {
+  padding: 12px;
+  max-height: 480px;
+  overflow-y: auto;
+}
+.draggableField {
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: grab;
+}
+.draggableField:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+.draggableField:active {
+  cursor: grabbing;
+}
+.fieldTypeGridForm {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.fieldTypeItemForm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid #d6e4ff;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: grab;
+  background: #fff;
+  color: #1890ff;
+}
+.fieldTypeItemForm:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+  background: #e6f4ff;
+}
+.fieldTypeItemForm:active {
+  cursor: grabbing;
+}
+.formPropsBlock {
+  font-size: 13px;
+}
+.formPropsBlock label {
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 4px;
+  color: #262626;
+}
+.formPropsBlock input[type="number"] {
+  width: 72px;
+}

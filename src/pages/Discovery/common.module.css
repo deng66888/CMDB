@@ -1,0 +1,38 @@
+.wrap {
+  padding: 24px;
+  background: #fff;
+  margin: 0 24px 24px;
+  border-radius: 8px;
+  min-height: 400px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.tableWrap {
+  margin-top: 16px;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.cardItem {
+  border-radius: 8px;
+  padding: 16px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+}
+
+.cardItem:hover {
+  border-color: #1677ff;
+  background: #f0f7ff;
+}

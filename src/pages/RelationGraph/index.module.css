@@ -1,0 +1,298 @@
+/* 与 UI 图一致：关系图画布与节点样式；占满 contentBody 以便画布有高度 */
+.wrap {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 14px 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.quickLocate {
+  width: 240px;
+}
+
+.toolbarToggles {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.toolbarToggles label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #4b5563;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.toolbarToggles input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #1890ff;
+}
+
+.toolbarActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.canvasWrap {
+  flex: 1;
+  min-height: 620px;
+  max-width: 960px;
+  width: 100%;
+  margin-left: 0;
+  margin-right: auto;
+  background: #fafafa;
+  border-radius: 8px;
+  position: relative;
+  overflow: auto;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+/* 整图缩放容器：用常规流占位，保证在任意布局下都可见 */
+.graphContent {
+  position: relative;
+  width: 920px;
+  min-height: 580px;
+  height: 580px;
+  display: block;
+}
+
+.graphScaledWrap {
+  position: relative;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.graphSvg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  display: block;
+}
+
+.graphNodes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.graphNodes > * {
+  pointer-events: auto;
+}
+
+/* 节点卡片：图标在左，文字在右；全部与中间应用服务器一致（浅蓝底） */
+.node {
+  position: absolute;
+  width: 200px;
+  min-height: 64px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.node:hover {
+  border-color: #1890ff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.18);
+  z-index: 2;
+}
+
+/* 当前配置项：高亮蓝框，与详情页一致 */
+.nodeCenter {
+  border: 2px solid #1890ff;
+  background: #f0f7ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+  z-index: 1;
+}
+
+/* 关联节点：灰框，与当前配置项区分 */
+.nodeOther {
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.currentTag {
+  margin-left: 6px;
+  padding: 0 6px;
+  font-size: 11px;
+  line-height: 18px;
+  color: #1890ff;
+  background: rgba(24, 144, 255, 0.1);
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.nodeIconWrap {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(24, 144, 255, 0.1);
+}
+
+.nodeIcon {
+  font-size: 24px;
+  color: #1890ff;
+}
+
+.nodeText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nodeName {
+  font-size: 13px;
+  font-weight: 500;
+  color: #262626;
+  line-height: 1.35;
+  word-break: break-all;
+}
+
+.nodeCategory {
+  font-size: 12px;
+  color: #595959;
+  line-height: 1.3;
+}
+
+/* 节点右键菜单 */
+.nodeMenu {
+  position: fixed;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  padding: 6px 0;
+  min-width: 180px;
+  z-index: 1000;
+  border: 1px solid #e5e7eb;
+}
+
+.nodeMenuItem {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #374151;
+  transition: background 0.15s;
+}
+
+.nodeMenuItem:hover {
+  background: #f5f5f5;
+}
+
+.nodeMenuItem:first-child {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+/* 画布右下角缩放栏：圆形按钮 */
+.zoomBar {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 5;
+}
+
+.zoomBar button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  color: #4b5563;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s;
+}
+
+.zoomBar button:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+  background: #f0f7ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+}
+
+/* 边标签：与配置项详情依赖关系图一致的灰色 */
+.edgeLabel {
+  font-size: 12px;
+  font-weight: 500;
+  fill: #8c8c8c;
+  pointer-events: none;
+}
+
+.edgeLabelHighlight {
+  font-size: 12px;
+  font-weight: 600;
+  fill: #1890ff;
+  pointer-events: none;
+}
+
+.filterDrawerSection {
+  margin-bottom: 20px;
+}
+
+.filterDrawerSectionTitle {
+  font-weight: 600;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #1f2937;
+}
