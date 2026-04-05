@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Input, Select, Table, Tag, Space, Dropdown, message, Badge, Tooltip, Modal } from 'antd'
-import { SearchOutlined, PlusOutlined, EditOutlined, MoreOutlined, AppstoreOutlined, QuestionCircleOutlined, FilterOutlined, UpOutlined, DownOutlined } from '@ant-design/icons'
+import { SearchOutlined, PlusOutlined, EditOutlined, MoreOutlined, AppstoreOutlined, QuestionCircleOutlined, FilterOutlined, UpOutlined, DownOutlined, ApartmentOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { ciListMock, applicationListMock, type CIRecord, type AppItem } from '@/mock/ci'
 import VersionDrawer from './VersionDrawer'
@@ -227,6 +227,18 @@ export default function CIManagement() {
                 items: [
                   { key: 'log', label: '活动日志', onClick: () => setActivityLogOpen(true) },
                   { key: 'share', label: '分享' },
+                  {
+                    key: 'relation',
+                    label: '关系图',
+                    icon: <ApartmentOutlined />,
+                    onClick: () => {
+                      const q = new URLSearchParams()
+                      q.set('id', record.id)
+                      q.set('name', record.name)
+                      q.set('category', record.category || '服务器')
+                      navigate(`/config/ci-relation-graph?${q.toString()}`)
+                    },
+                  },
                   { key: 'version', label: '版本管理', onClick: () => { setVersionDrawerRecord(record); setVersionDrawerOpen(true) } },
                   { key: 'draft', label: '草稿管理', onClick: () => navigate('/config/draft') },
                   { key: 'batch', label: '批量修改' },

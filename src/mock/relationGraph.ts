@@ -151,6 +151,17 @@ function iconTypeForCategory(category: string): 'server' | 'app' | 'business' {
  * - 当前配置项必为节点且处于中心，上游在左、下游在右
  * - 仅包含与当前 CI 直接相连的节点及它们之间的边，关系逻辑符合真实大企业拓扑
  */
+/** 仅传节点 id：从资产表解析名称与类型后拉取以该节点为中心的关系图（用于拓扑漫游切换中心） */
+export function getGraphDataByNodeId(nodeId: string) {
+  const asset = assetById.get(nodeId)
+  const name = asset?.name ?? nodeId
+  const category = asset?.category ?? '服务器'
+  return getRelationGraphData(nodeId, name, category)
+}
+
+/** 与「点击节点以该 id 为中心拉取拓扑」的常见命名一致 */
+export const getGraphData = getGraphDataByNodeId
+
 export function getRelationGraphData(ciId: string, ciName: string, category: string) {
   const idSet = new Set<string>([ciId])
   const relevantEdges = enterpriseRelationsMock.filter((e) => e.sourceId === ciId || e.targetId === ciId)

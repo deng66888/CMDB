@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { Select, Button, Drawer, Checkbox, Slider, Switch, message, Modal, Descriptions, Table, Tag, Empty, Progress } from 'antd'
+import { Select, Button, Drawer, Checkbox, Slider, Switch, message, Modal, Descriptions, Table, Tag, Empty, Progress, Breadcrumb, Alert } from 'antd'
 import { Line } from '@ant-design/plots'
 import {
   FilterOutlined,
@@ -15,9 +15,11 @@ import {
   ApiOutlined,
   DatabaseOutlined,
   CloudOutlined,
+  ApartmentOutlined,
 } from '@ant-design/icons'
 import {
   getRelationGraphData,
+  getGraphDataByNodeId,
   getQuickLocateOptions,
   defaultRelationGraphFilter,
   relationTypeOptions,
@@ -191,7 +193,14 @@ export default function RelationGraph() {
   const openFilterOnMount = searchParams.get('filter') === '1'
 
   const [focusCenter, setFocusCenter] = useState(true)
-  const [roamMode, setRoamMode] = useState(false)
+  /** 拓扑漫游：全屏弹窗内以点击节点为中心重载拓扑 */
+  const [roamModalOpen, setRoamModalOpen] = useState(false)
+  const [roamGraphData, setRoamGraphData] = useState(() => getRelationGraphData('ci-detail-1', '应用服务器', '服务器'))
+  const [roamCenterId, setRoamCenterId] = useState('')
+  const [roamQuickLocate, setRoamQuickLocate] = useState('')
+  const [roamStack, setRoamStack] = useState<{ id: string; name: string; category: string }[]>([])
+  const [roamZoom, setRoamZoom] = useState(1)
+  const [roamHoveredId, setRoamHoveredId] = useState<string | null>(null)
   const [changeImpact, setChangeImpact] = useState(false)
   const [enableMonitor, setEnableMonitor] = useState(false)
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
@@ -231,6 +240,85 @@ export default function RelationGraph() {
   const pos = useMemo(() => layoutNodes(nodes, edges, quickLocateValue), [nodes, edges, quickLocateValue])
   const quickLocateOptions = useMemo(() => getQuickLocateOptions(ciId, ciName), [ciId, ciName])
   const isCurrentNode = (nodeId: string) => nodeId === ciId
+
+  const roamNodes = roamGraphData.nodes
+  const roamEdges = roamGraphData.edges
+  const roamPos = useMemo(() => layoutNodes(roamNodes, roamEdges, roamQuickLocate), [roamNodes, roamEdges, roamQuickLocate])
+  const roamEndpointOffsets = useMemo(() => getTargetEndpointOffsets(roamEdges, roamPos), [roamEdges, roamPos])
+  const roamQuickOptions = useMemo(
+    () => roamNodes.map((n) => ({ value: n.id, label: `${n.name}（${n.category}）` })),
+    [roamNodes],
+  )
+
+  const scrollNodeIntoCanvasCenter = useCallback((nodeId: string) => {
+    const el = document.querySelector<HTMLElement>(`[data-relation-node="${nodeId}"]`)
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
+  }, [])
+
+  const scrollRoamNodeIntoView = useCallback((nodeId: string) => {
+    const el = document.querySelector<HTMLElement>(`[data-roam-node="${nodeId}"]`)
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
+  }, [])
+
+  /** 聚焦居中：勾选时，切换快速定位后把该节点滚入可视区中央 */
+  useEffect(() => {
+    if (!focusCenter) return
+    const id = requestAnimationFrame(() => scrollNodeIntoCanvasCenter(quickLocateValue))
+    return () => cancelAnimationFrame(id)
+  }, [focusCenter, quickLocateValue, pos, scrollNodeIntoCanvasCenter])
+
+  /** 漫游弹窗内切换中心后滚入视野 */
+  useEffect(() => {
+    if (!roamModalOpen || !focusCenter) return
+    const id = requestAnimationFrame(() => scrollRoamNodeIntoView(roamQuickLocate))
+    return () => cancelAnimationFrame(id)
+  }, [roamModalOpen, focusCenter, roamQuickLocate, roamPos, scrollRoamNodeIntoView])
+
+  const openRoamModal = useCallback(() => {
+    const data = getRelationGraphData(ciId, ciName, categoryFromUrl)
+    setRoamGraphData(data)
+    setRoamCenterId(ciId)
+    setRoamQuickLocate(ciId)
+    setRoamZoom(1)
+    setRoamHoveredId(null)
+    setRoamStack([{ id: ciId, name: ciName, category: categoryFromUrl }])
+    setRoamModalOpen(true)
+  }, [ciId, ciName, categoryFromUrl])
+
+  const jumpRoamToIndex = useCallback((index: number) => {
+    setRoamStack((prev) => {
+      const segment = prev[index]
+      if (!segment) return prev
+      const nextStack = prev.slice(0, index + 1)
+      setRoamGraphData(getGraphDataByNodeId(segment.id))
+      setRoamCenterId(segment.id)
+      setRoamQuickLocate(segment.id)
+      return nextStack
+    })
+  }, [])
+
+  const handleRoamNodeClick = useCallback(
+    (node: RelationGraphNode) => {
+      if (node.id === roamCenterId) return
+      setRoamGraphData(getGraphDataByNodeId(node.id))
+      setRoamCenterId(node.id)
+      setRoamQuickLocate(node.id)
+      setRoamStack((s) => [...s, { id: node.id, name: node.name, category: node.category }])
+    },
+    [roamCenterId],
+  )
+
+  const roamBack = useCallback(() => {
+    if (roamStack.length <= 1) return
+    jumpRoamToIndex(roamStack.length - 2)
+  }, [roamStack, jumpRoamToIndex])
+
+  /** 漫游图数据变化后，保证布局中心落在当前节点列表内 */
+  useEffect(() => {
+    if (!roamModalOpen || roamNodes.length === 0) return
+    const has = roamNodes.some((n) => n.id === roamQuickLocate)
+    if (!has) setRoamQuickLocate(roamCenterId)
+  }, [roamModalOpen, roamNodes, roamQuickLocate, roamCenterId])
 
   useEffect(() => {
     if (openFilterOnMount) setFilterDrawerOpen(true)
@@ -407,7 +495,8 @@ export default function RelationGraph() {
           const offsetY = endpointOffsets[e.id] ?? 0
           const { path, labelX, labelY } = getEdgePathAndLabel(pos, e.sourceId, e.targetId, offsetY)
           if (!path) return null
-          const isHighlighted = hoveredNodeId != null && (e.sourceId === hoveredNodeId || e.targetId === hoveredNodeId)
+          const isHighlighted =
+            hoveredNodeId != null && (e.sourceId === hoveredNodeId || e.targetId === hoveredNodeId)
           const markerId = isHighlighted ? 'arrowhead-blue' : 'arrowhead-gray'
           return (
             <g key={e.id}>
@@ -436,10 +525,80 @@ export default function RelationGraph() {
     </svg>
   ), [edges, pos, endpointOffsets, hoveredNodeId])
 
+  const roamSvgContent = useMemo(
+    () => (
+      <svg
+        className={styles.graphSvg}
+        width={CANVAS_W}
+        height={CANVAS_H}
+        viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
+        preserveAspectRatio="xMidYMid meet"
+      >
+        <defs>
+          <marker id="arrowhead-gray-roam" markerWidth={12} markerHeight={10} refX={10} refY={5} orient="auto" markerUnits="userSpaceOnUse">
+            <polygon points="0 0, 10 5, 0 10" fill="#bfbfbf" />
+          </marker>
+          <marker id="arrowhead-blue-roam" markerWidth={12} markerHeight={10} refX={10} refY={5} orient="auto" markerUnits="userSpaceOnUse">
+            <polygon points="0 0, 10 5, 0 10" fill="#1890ff" />
+          </marker>
+        </defs>
+        <g>
+          {roamEdges.map((e) => {
+            const offsetY = roamEndpointOffsets[e.id] ?? 0
+            const { path, labelX, labelY } = getEdgePathAndLabel(roamPos, e.sourceId, e.targetId, offsetY)
+            if (!path) return null
+            const isHighlighted =
+              roamHoveredId != null && (e.sourceId === roamHoveredId || e.targetId === roamHoveredId)
+            const markerId = isHighlighted ? 'arrowhead-blue-roam' : 'arrowhead-gray-roam'
+            return (
+              <g key={e.id}>
+                <path
+                  key={`${e.id}-stroke-${isHighlighted}`}
+                  d={path}
+                  stroke={isHighlighted ? '#1890ff' : '#bfbfbf'}
+                  strokeWidth={isHighlighted ? 2 : 1}
+                  fill="none"
+                  markerEnd={`url(#${markerId})`}
+                />
+                <text
+                  x={labelX}
+                  y={labelY}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  className={isHighlighted ? styles.edgeLabelHighlight : styles.edgeLabel}
+                >
+                  {e.relation}
+                </text>
+              </g>
+            )
+          })}
+        </g>
+      </svg>
+    ),
+    [roamEdges, roamPos, roamEndpointOffsets, roamHoveredId],
+  )
+
   return (
     <div className={styles.wrap}>
+      <Alert
+        type="info"
+        showIcon
+        closable
+        message="拓扑漫游入口：标题行右侧蓝色「拓扑漫游」按钮。请从配置项详情或列表操作「关系图」进入本页并携带实例参数。若界面异常可强制刷新（Ctrl+Shift+R / Cmd+Shift+R）。"
+        className={styles.roamNotice}
+      />
       <div className={styles.header}>
-        <h2 className={styles.title}>{ciName}关系图</h2>
+        <div className={styles.titleRow}>
+          <h2 className={styles.title}>{ciName}关系图</h2>
+          <Button
+            type="primary"
+            icon={<ApartmentOutlined />}
+            onClick={openRoamModal}
+            title="全屏打开拓扑漫游：点击节点以该点为中心重载拓扑，支持面包屑与上一步回退。"
+          >
+            拓扑漫游
+          </Button>
+        </div>
         <div className={styles.toolbar}>
           <Select
             className={styles.quickLocate}
@@ -457,13 +616,9 @@ export default function RelationGraph() {
               <input type="checkbox" checked={enableMonitor} onChange={(e) => setEnableMonitor(e.target.checked)} />
               启用监控
             </label>
-            <label>
+            <label title="勾选后，切换「快速定位」时自动将目标节点滚入画布可视区中央。">
               <input type="checkbox" checked={focusCenter} onChange={(e) => setFocusCenter(e.target.checked)} />
               聚焦居中
-            </label>
-            <label>
-              <input type="checkbox" checked={roamMode} onChange={(e) => setRoamMode(e.target.checked)} />
-              漫游模式
             </label>
           </div>
           <div className={styles.toolbarActions}>
@@ -504,6 +659,7 @@ export default function RelationGraph() {
                 return (
                   <div
                     key={node.id}
+                    data-relation-node={node.id}
                     className={nodeClass}
                     style={{ left: p.x, top: p.y }}
                     onClick={() => setQuickLocateValue(node.id)}
@@ -751,6 +907,118 @@ export default function RelationGraph() {
           )
         })()}
       </Drawer>
+
+      <Modal
+        open={roamModalOpen}
+        onCancel={() => setRoamModalOpen(false)}
+        footer={null}
+        width="100%"
+        centered={false}
+        getContainer={() => document.body}
+        zIndex={1100}
+        maskClosable
+        wrapClassName={styles.roamModalWrap}
+        rootClassName={styles.roamModalRoot}
+        className={styles.roamModal}
+        style={{ top: 0, paddingBottom: 0, maxWidth: '100vw' }}
+        styles={{ content: { borderRadius: 0, overflow: 'hidden', height: '100vh', maxHeight: '100vh' }, body: { padding: 0, height: '100%', maxHeight: '100vh' } }}
+        destroyOnClose
+        closable={false}
+      >
+        <div className={styles.roamModalInner}>
+          <div className={styles.roamModalHeader}>
+            <div className={styles.roamModalTitleRow}>
+              <span className={styles.roamModalTitle}>拓扑漫游</span>
+              <Button type="primary" ghost size="small" onClick={() => setRoamModalOpen(false)}>
+                关闭
+              </Button>
+            </div>
+            <p className={styles.roamModalHint}>
+              点击任意节点将以该节点为中心重新加载直连拓扑；下方面包屑可跳转历史，「上一步」回退上一级。
+            </p>
+            <div className={styles.roamCurrentLine}>
+              当前漫游节点：<strong>{roamStack[roamStack.length - 1]?.name ?? '—'}</strong>
+              <span className={styles.roamEntryHint}>（入口：{ciName}）</span>
+            </div>
+            <Breadcrumb
+              className={styles.roamBreadcrumb}
+              items={roamStack.map((s, i) => ({
+                title: (
+                  <button type="button" className={styles.roamCrumbBtn} onClick={() => jumpRoamToIndex(i)}>
+                    {s.name}
+                  </button>
+                ),
+              }))}
+            />
+            <div className={styles.roamModalToolbar}>
+              <Button size="small" disabled={roamStack.length <= 1} onClick={roamBack}>
+                上一步
+              </Button>
+              <Select
+                className={styles.roamQuickSelect}
+                value={roamQuickLocate}
+                onChange={setRoamQuickLocate}
+                options={roamQuickOptions}
+                placeholder="布局中心（仅排布，不切换数据）"
+              />
+            </div>
+          </div>
+          <div className={styles.roamCanvasWrap}>
+            <div className={styles.graphContent}>
+              <div
+                className={styles.graphScaledWrap}
+                style={{
+                  width: CANVAS_W,
+                  height: CANVAS_H,
+                  transform: `scale(${roamZoom})`,
+                  transformOrigin: 'center center',
+                }}
+              >
+                {roamSvgContent}
+                <div className={styles.graphNodes} style={{ width: CANVAS_W, height: CANVAS_H }}>
+                  {roamNodes.map((node) => {
+                    const p = roamPos[node.id]
+                    if (!p) return null
+                    const isRoamCenter = node.id === roamCenterId
+                    const nodeClass = `${styles.node} ${isRoamCenter ? styles.nodeCenter : styles.nodeOther}`
+                    return (
+                      <div
+                        key={node.id}
+                        data-roam-node={node.id}
+                        className={nodeClass}
+                        style={{ left: p.x, top: p.y }}
+                        onClick={() => handleRoamNodeClick(node)}
+                        onMouseEnter={() => setRoamHoveredId(node.id)}
+                        onMouseLeave={() => setRoamHoveredId(null)}
+                        onContextMenu={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                        }}
+                      >
+                        <div className={styles.nodeIconWrap}>
+                          <NodeIcon category={node.category} />
+                        </div>
+                        <div className={styles.nodeText}>
+                          <div className={styles.nodeName}>
+                            {node.name}
+                            {isRoamCenter && <span className={styles.currentTag}>漫游中心</span>}
+                          </div>
+                          <div className={styles.nodeCategory}>{node.category}</div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+            <div className={styles.zoomBar}>
+              <Button type="text" icon={<ExpandOutlined />} title="适应画布" onClick={() => setRoamZoom(1)} />
+              <Button type="text" icon={<ZoomInOutlined />} title="放大" onClick={() => setRoamZoom((z) => Math.min(z + 0.2, 2))} />
+              <Button type="text" icon={<ZoomOutOutlined />} title="缩小" onClick={() => setRoamZoom((z) => Math.max(z - 0.2, 0.5))} />
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
